@@ -36,7 +36,14 @@ export const NextRaceHighLight = ({ race }: { race: Race | null }) => {
         return () => clearInterval(timer);
     }, [race]);
 
-    if (!race) return null;
+    if (!race) {
+        return (
+            <div className="text-center py-20">
+                <Badge variant="winner">Bem-vindo ao F1 Pulse</Badge>
+                <h1 className="text-3xl font-black mt-4 uppercase">Carregando Grid...</h1>
+            </div>
+        );
+    }
 
     const getBrazilTime = () => {
         if (!race.date || !race.time) return 'TBA';
