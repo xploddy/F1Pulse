@@ -253,7 +253,7 @@ export default async function HistoryPage() {
                                     </div>
                                     <div>
                                         <h4 className="text-f1-red font-bold text-sm uppercase">Lotus 79 (1978)</h4>
-                                        <p className="text-xs text-f1-gray">O 'Carro Asa'. Revolucionou o esporte com o uso do efeito solo.</p>
+                                        <p className="text-xs text-f1-gray">O &apos;Carro Asa&apos;. Revolucionou o esporte com o uso do efeito solo.</p>
                                     </div>
                                     <div>
                                         <h4 className="text-f1-red font-bold text-sm uppercase">Williams FW14B (1992)</h4>
