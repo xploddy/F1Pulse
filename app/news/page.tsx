@@ -1,57 +1,28 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { getF1News } from '@/services/api';
 import { Card, Badge } from '@/components/UI';
-import { ExternalLink, Calendar, User, Newspaper, RefreshCcw } from 'lucide-react';
+import { ExternalLink, Calendar, User, Newspaper } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-export default function NewsPage() {
-    const [articles, setArticles] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+export const revalidate = 3600; // Atualiza as notícias a cada 1 hora no servidor
 
-    const fetchNews = async () => {
-        setLoading(true);
-        const data = await getF1News();
-        setArticles(data);
-        setLoading(false);
-    };
-
-    useEffect(() => {
-        fetchNews();
-    }, []);
+export default async function NewsPage() {
+    const articles = await getF1News();
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-12">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-                <div className="flex flex-col">
-                    <h1 className="text-4xl font-black uppercase tracking-tight italic flex items-center gap-3">
-                        <Newspaper size={36} className="text-f1-red" />
-                        Notícias F1
-                    </h1>
-                    <p className="text-f1-gray mt-2 font-medium">As últimas atualizações e fofocas do paddock em português.</p>
-                </div>
-
-                <button
-                    onClick={fetchNews}
-                    disabled={loading}
-                    className="flex items-center gap-2 bg-f1-card hover:bg-f1-card/80 border border-f1-gray/20 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all disabled:opacity-50"
-                >
-                    <RefreshCcw size={14} className={loading ? 'animate-spin' : ''} />
-                    Atualizar
-                </button>
+            <div className="flex flex-col mb-12">
+                <h1 className="text-4xl font-black uppercase tracking-tight italic flex items-center gap-3 text-white">
+                    <Newspaper size={36} className="text-f1-red" />
+                    Notícias F1
+                </h1>
+                <p className="text-f1-gray mt-2 font-medium">As últimas atualizações e fofocas do paddock em português.</p>
             </div>
 
-            {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                        <div key={i} className="h-[400px] bg-f1-card/50 animate-pulse rounded-xl border border-f1-gray/10" />
-                    ))}
-                </div>
-            ) : articles.length === 0 ? (
+            {articles.length === 0 ? (
                 <div className="text-center py-20 bg-f1-card rounded-xl border border-f1-gray/10">
-                    <p className="text-f1-gray text-lg">Nenhuma notícia encontrada no momento.</p>
+                    <p className="text-f1-gray text-lg">Nenhuma notícia encontrada no momento. Verifique se a API Key está configurada na Vercel.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -63,22 +34,20 @@ export default function NewsPage() {
                                         src={article.urlToImage}
                                         alt={article.title}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        onError={(e) => {
-                                            (e.target as any).style.display = 'none';
-                                        }}
+                                        loading="lazy"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-f1-dark to-transparent opacity-60" />
                                 </div>
                             )}
 
                             <div className="p-6 flex flex-col flex-grow">
-                                <div className="flex items-center justify-between mb-3">
-                                    <Badge variant="default" className="bg-f1-red/10 text-f1-red border border-f1-red/20">
+                                <div className="flex items-center justify-between mb-3 text-white">
+                                    <Badge variant="default" className="bg-f1-red/10 text-f1-red border border-f1-red/20 shadow-none">
                                         {article.source.name}
                                     </Badge>
                                     <div className="flex items-center gap-1 text-[10px] text-f1-gray font-bold uppercase">
                                         <Calendar size={12} />
-                                        {article.publishedAt ? format(parseISO(article.publishedAt), "dd 'de' MMM", { locale: ptBR }) : 'Recent'}
+                                        {article.publishedAt ? format(parseISO(article.publishedAt), "dd 'de' MMM", { locale: ptBR }) : 'Hoje'}
                                     </div>
                                 </div>
 
