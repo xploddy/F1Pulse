@@ -116,8 +116,13 @@ export const getF1News = async (): Promise<any[]> => {
             '"Formula 1" OR "Formula One" OR "Grande Prêmio" OR "GP de" OR "Verstappen" OR "Hamilton" OR "Leclerc" OR "Norris" OR "McLaren F1" OR "Ferrari F1" OR "Red Bull Racing" OR "Mercedes F1" OR "corrida de F1"'
         );
 
+        // Busca notícias dos últimos 3 dias
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        const fromDate = threeDaysAgo.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+
         const response = await axios.get(
-            `https://newsapi.org/v2/everything?q=${query}&language=pt&sortBy=publishedAt&pageSize=50&apiKey=${apiKey}`
+            `https://newsapi.org/v2/everything?q=${query}&language=pt&sortBy=publishedAt&pageSize=50&from=${fromDate}&apiKey=${apiKey}`
         );
 
         const articles = response.data?.articles || [];

@@ -5,7 +5,7 @@ import { ExternalLink, Calendar, User, Newspaper } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-export const revalidate = 3600; // Atualiza as notícias a cada 1 hora no servidor
+export const revalidate = 900; // Atualiza a cada 15 minutos no servidor
 
 export default async function NewsPage() {
     const articles = await getF1News();
@@ -18,6 +18,7 @@ export default async function NewsPage() {
                     Notícias F1
                 </h1>
                 <p className="text-f1-gray mt-2 font-medium">As últimas atualizações e fofocas do paddock em português.</p>
+                <p className="text-xs text-f1-gray/60 mt-1 font-medium uppercase tracking-widest">⏱ Atualizado automaticamente a cada 15 minutos</p>
             </div>
 
             {articles.length === 0 ? (
