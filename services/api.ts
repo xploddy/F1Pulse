@@ -107,3 +107,13 @@ export const getCurrentConstructors = async (): Promise<any[]> => {
         return [];
     }
 };
+export const getF1News = async (): Promise<any[]> => {
+    try {
+        const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY || '5afe87181f774c0fad0d04ca5f8a180c';
+        const response = await axios.get(`https://newsapi.org/v2/everything?q="Formula 1" OR "F1"&language=pt&sortBy=publishedAt&pageSize=20&apiKey=${apiKey}`);
+        return response.data?.articles || [];
+    } catch (error) {
+        console.error('Error fetching F1 news:', error);
+        return [];
+    }
+};

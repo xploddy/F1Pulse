@@ -3,13 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Calendar, Trophy, List, History, Users } from 'lucide-react';
+import { Home, Calendar, Trophy, List, History, Users, Newspaper } from 'lucide-react';
 
 export const Navigation = () => {
     const pathname = usePathname();
 
     const navItems = [
         { name: 'Pulse', path: '/', icon: Home },
+        { name: 'Notícias', path: '/news', icon: Newspaper },
         { name: 'Calendário', path: '/calendar', icon: Calendar },
         { name: 'Paddock', path: '/paddock', icon: Users },
         { name: 'Classificação', path: '/standings', icon: Trophy },
