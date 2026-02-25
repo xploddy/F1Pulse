@@ -1,35 +1,64 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { getF1News } from '@/services/api';
 import { Card, Badge } from '@/components/UI';
-import { ExternalLink, Calendar, User, Newspaper } from 'lucide-react';
+import { ExternalLink, Calendar, User, Newspaper, RefreshCcw } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-export const revalidate = 3600; // Refresh news every hour
+export default function NewsPage() {
+    const [articles, setArticles] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-export default async function NewsPage() {
-    const articles = await getF1News();
+    const fetchNews = async () => {
+        setLoading(true);
+        const data = await getF1News();
+        setArticles(data);
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        fetchNews();
+    }, []);
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-12">
-            <div className="flex flex-col mb-12">
-                <h1 className="text-4xl font-black uppercase tracking-tight italic flex items-center gap-3">
-                    <Newspaper size={36} className="text-f1-red" />
-                    Notícias F1
-                </h1>
-                <p className="text-f1-gray mt-2 font-medium">As últimas atualizações, fofocas do paddock e atualizações técnicas diretamente para você.</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                <div className="flex flex-col">
+                    <h1 className="text-4xl font-black uppercase tracking-tight italic flex items-center gap-3">
+                        <Newspaper size={36} className="text-f1-red" />
+                        Notícias F1
+                    </h1>
+                    <p className="text-f1-gray mt-2 font-medium">As últimas atualizações e fofocas do paddock em português.</p>
+                </div>
+
+                <button
+                    onClick={fetchNews}
+                    disabled={loading}
+                    className="flex items-center gap-2 bg-f1-card hover:bg-f1-card/80 border border-f1-gray/20 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all disabled:opacity-50"
+                >
+                    <RefreshCcw size={14} className={loading ? 'animate-spin' : ''} />
+                    Atualizar
+                </button>
             </div>
 
-            {articles.length === 0 ? (
+            {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <div key={i} className="h-[400px] bg-f1-card/50 animate-pulse rounded-xl border border-f1-gray/10" />
+                    ))}
+                </div>
+            ) : articles.length === 0 ? (
                 <div className="text-center py-20 bg-f1-card rounded-xl border border-f1-gray/10">
-                    <p className="text-f1-gray text-lg">Nenhuma notícia encontrada no momento. Tente novamente mais tarde.</p>
+                    <p className="text-f1-gray text-lg">Nenhuma notícia encontrada no momento.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {articles.map((article: any, idx: number) => (
-                        <Card key={idx} className="flex flex-col h-full bg-f1-card hover:border-f1-red/30 transition-all overflow-hidden group">
+                        <Card key={idx} className="flex flex-col h-full bg-f1-card hover:border-f1-red/30 transition-all overflow-hidden group border-f1-gray/10">
                             {article.urlToImage && (
-                                <div className="relative h-48 overflow-hidden">
+                                <div className="relative h-48 overflow-hidden bg-f1-dark">
                                     <img
                                         src={article.urlToImage}
                                         alt={article.title}
@@ -49,11 +78,11 @@ export default async function NewsPage() {
                                     </Badge>
                                     <div className="flex items-center gap-1 text-[10px] text-f1-gray font-bold uppercase">
                                         <Calendar size={12} />
-                                        {format(parseISO(article.publishedAt), "dd 'de' MMM", { locale: ptBR })}
+                                        {article.publishedAt ? format(parseISO(article.publishedAt), "dd 'de' MMM", { locale: ptBR }) : 'Recent'}
                                     </div>
                                 </div>
 
-                                <h2 className="text-xl font-bold leading-tight mb-3 group-hover:text-f1-red transition-colors line-clamp-3">
+                                <h2 className="text-xl font-bold leading-tight mb-3 group-hover:text-f1-red transition-colors line-clamp-3 text-white">
                                     {article.title}
                                 </h2>
 
