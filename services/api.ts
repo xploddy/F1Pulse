@@ -110,8 +110,48 @@ export const getCurrentConstructors = async (): Promise<any[]> => {
 export const getF1News = async (): Promise<any[]> => {
     try {
         const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY || '5afe87181f774c0fad0d04ca5f8a180c';
-        const response = await axios.get(`https://newsapi.org/v2/everything?q="Formula 1" OR "F1"&language=pt&sortBy=publishedAt&pageSize=20&apiKey=${apiKey}`);
-        return response.data?.articles || [];
+
+        // Query específica para Formula 1 com termos que excluem ambiguidades
+        const query = encodeURIComponent(
+            '"Formula 1" OR "Formula One" OR "Grande Prêmio" OR "GP de" OR "Verstappen" OR "Hamilton" OR "Leclerc" OR "Norris" OR "McLaren F1" OR "Ferrari F1" OR "Red Bull Racing" OR "Mercedes F1" OR "corrida de F1"'
+        );
+
+        const response = await axios.get(
+            `https://newsapi.org/v2/everything?q=${query}&language=pt&sortBy=publishedAt&pageSize=50&apiKey=${apiKey}`
+        );
+
+        const articles = response.data?.articles || [];
+
+        // Palavras-chave obrigatórias: ao menos uma deve estar presente no título ou descrição
+        const f1Keywords = [
+            'formula 1', 'formula one', 'f1', 'grande prêmio', 'gp de', 'motorsport',
+            'piloto', 'grid', 'paddock', 'pit stop', 'pole position', 'verstappen',
+            'hamilton', 'leclerc', 'norris', 'sainz', 'russell', 'alonso', 'perez',
+            'mclaren', 'ferrari', 'red bull', 'mercedes', 'alpine', 'aston martin',
+            'williams', 'haas', 'racing bulls', 'temporada de f1', 'corrida',
+        ];
+
+        // Palavras que indicam que o artigo NÃO é sobre F1
+        const excludeKeywords = [
+            'fórmula injetável', 'fórmula magistral', 'matemática', 'química',
+            'programação', 'excel', 'planilha', 'fórmula do amor',
+        ];
+
+        const filtered = articles.filter((article: any) => {
+            const text = `${article.title || ''} ${article.description || ''}`.toLowerCase();
+
+            // Descarta artigos sem título ou com URLs inválidas
+            if (!article.title || !article.url || article.title === '[Removed]') return false;
+
+            // Descarta se contém palavras de exclusão óbvias
+            if (excludeKeywords.some(kw => text.includes(kw))) return false;
+
+            // Mantém apenas se tiver pelo menos uma keyword de F1
+            return f1Keywords.some(kw => text.includes(kw));
+        });
+
+        // Retorna até 20 notícias depois do filtro
+        return filtered.slice(0, 20);
     } catch (error) {
         console.error('Error fetching F1 news:', error);
         return [];
