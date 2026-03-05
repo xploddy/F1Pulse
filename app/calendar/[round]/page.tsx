@@ -4,6 +4,7 @@ import { Card, Badge } from '@/components/UI';
 import { MapPin, Calendar, Clock, Tv, Info } from 'lucide-react';
 import { format, parseISO, addHours } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { CircuitPreview } from '@/components/CircuitPreview';
 
 export const revalidate = 86400; // Daily
 
@@ -53,7 +54,7 @@ export default async function RaceDetailPage({ params }: { params: { round: stri
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-12">
-            <div className="mb-12">
+            <div className="mb-8">
                 <Badge variant="winner">Round {race.round}</Badge>
                 <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter italic mt-2">{race.raceName}</h1>
                 <div className="flex flex-wrap items-center gap-4 mt-4 text-f1-gray">
@@ -61,11 +62,17 @@ export default async function RaceDetailPage({ params }: { params: { round: stri
                         <MapPin size={18} className="text-f1-red" />
                         <span>{race.Circuit.circuitName}, {race.Circuit.Location.country}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                        <Info size={18} className="text-f1-red" />
-                        <span>{race.Circuit.Location.locality}</span>
-                    </div>
                 </div>
+            </div>
+
+            <div className="mb-12">
+                <CircuitPreview
+                    circuitId={race.Circuit.circuitId}
+                    raceName={race.raceName.replace(' Grand Prix', '')}
+                    locality={race.Circuit.Location.locality}
+                    country={race.Circuit.Location.country}
+                    round={race.round}
+                />
             </div>
 
             <div className="grid grid-cols-1 gap-6">
