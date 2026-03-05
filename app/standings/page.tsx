@@ -38,59 +38,83 @@ export default async function StandingsPage({
 
             <div className="flex flex-col gap-2">
                 {!isTeams ? (
-                    driverStandings.map((standing) => (
-                        <Card key={standing.Driver.driverId} className="p-4 md:p-6 flex items-center justify-between group">
-                            <div className="flex items-center gap-4 md:gap-8">
-                                <span className="text-2xl font-black italic text-f1-gray/40 w-8">{standing.position}</span>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-lg md:text-xl font-bold">
-                                            {standing.Driver.givenName} <span className="uppercase">{standing.Driver.familyName}</span>
-                                        </h3>
-                                        {standing.position === "1" && <Trophy size={16} className="text-f1-red" />}
+                    driverStandings.length > 0 ? (
+                        driverStandings.map((standing) => (
+                            <Card key={standing.Driver.driverId} className="p-4 md:p-6 flex items-center justify-between group">
+                                <div className="flex items-center gap-4 md:gap-8">
+                                    <span className="text-2xl font-black italic text-f1-gray/40 w-8">{standing.position}</span>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-lg md:text-xl font-bold">
+                                                {standing.Driver.givenName} <span className="uppercase">{standing.Driver.familyName}</span>
+                                            </h3>
+                                            {standing.position === "1" && <Trophy size={16} className="text-f1-red" />}
+                                        </div>
+                                        <p className="text-f1-gray text-xs md:text-sm uppercase tracking-wider font-medium">{standing.Constructors[0]?.name}</p>
                                     </div>
-                                    <p className="text-f1-gray text-xs md:text-sm uppercase tracking-wider font-medium">{standing.Constructors[0]?.name}</p>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                <div className="hidden md:flex flex-col items-end">
-                                    <span className="text-[10px] uppercase font-bold text-f1-gray tracking-tighter">Wins</span>
-                                    <span className="font-bold">{standing.wins}</span>
+                                <div className="flex items-center gap-6">
+                                    <div className="hidden md:flex flex-col items-end">
+                                        <span className="text-[10px] uppercase font-bold text-f1-gray tracking-tighter">Wins</span>
+                                        <span className="font-bold">{standing.wins}</span>
+                                    </div>
+                                    <div className="flex flex-col items-end min-w-[60px]">
+                                        <span className="text-[10px] uppercase font-bold text-f1-red tracking-tighter">Points</span>
+                                        <span className="text-xl font-black italic">{standing.points}</span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col items-end min-w-[60px]">
-                                    <span className="text-[10px] uppercase font-bold text-f1-red tracking-tighter">Points</span>
-                                    <span className="text-xl font-black italic">{standing.points}</span>
-                                </div>
+                            </Card>
+                        ))
+                    ) : (
+                        <Card className="p-12 border-dashed flex flex-col items-center justify-center text-center gap-4">
+                            <Trophy size={48} className="text-f1-gray opacity-50" />
+                            <div>
+                                <h3 className="text-2xl font-black uppercase tracking-tighter">Classificação Zerada</h3>
+                                <p className="text-f1-gray mt-2 max-w-md mx-auto">
+                                    A temporada ainda não começou! Os pontos e a tabela de classificação de pilotos serão atualizados automaticamente após a primeira corrida do ano.
+                                </p>
                             </div>
                         </Card>
-                    ))
+                    )
                 ) : (
-                    constructorStandings.map((standing) => (
-                        <Card key={standing.Constructor.constructorId} className="p-4 md:p-6 flex items-center justify-between group">
-                            <div className="flex items-center gap-4 md:gap-8">
-                                <span className="text-2xl font-black italic text-f1-gray/40 w-8">{standing.position}</span>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight">
-                                            {standing.Constructor.name}
-                                        </h3>
-                                        {standing.position === "1" && <Trophy size={16} className="text-f1-red" />}
+                    constructorStandings.length > 0 ? (
+                        constructorStandings.map((standing) => (
+                            <Card key={standing.Constructor.constructorId} className="p-4 md:p-6 flex items-center justify-between group">
+                                <div className="flex items-center gap-4 md:gap-8">
+                                    <span className="text-2xl font-black italic text-f1-gray/40 w-8">{standing.position}</span>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight">
+                                                {standing.Constructor.name}
+                                            </h3>
+                                            {standing.position === "1" && <Trophy size={16} className="text-f1-red" />}
+                                        </div>
+                                        <p className="text-f1-gray text-xs md:text-sm">{standing.Constructor.nationality}</p>
                                     </div>
-                                    <p className="text-f1-gray text-xs md:text-sm">{standing.Constructor.nationality}</p>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                <div className="hidden md:flex flex-col items-end">
-                                    <span className="text-[10px] uppercase font-bold text-f1-gray tracking-tighter">Wins</span>
-                                    <span className="font-bold">{standing.wins}</span>
+                                <div className="flex items-center gap-6">
+                                    <div className="hidden md:flex flex-col items-end">
+                                        <span className="text-[10px] uppercase font-bold text-f1-gray tracking-tighter">Wins</span>
+                                        <span className="font-bold">{standing.wins}</span>
+                                    </div>
+                                    <div className="flex flex-col items-end min-w-[60px]">
+                                        <span className="text-[10px] uppercase font-bold text-f1-red tracking-tighter">Points</span>
+                                        <span className="text-xl font-black italic">{standing.points}</span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col items-end min-w-[60px]">
-                                    <span className="text-[10px] uppercase font-bold text-f1-red tracking-tighter">Points</span>
-                                    <span className="text-xl font-black italic">{standing.points}</span>
-                                </div>
+                            </Card>
+                        ))
+                    ) : (
+                        <Card className="p-12 border-dashed flex flex-col items-center justify-center text-center gap-4">
+                            <Trophy size={48} className="text-f1-gray opacity-50" />
+                            <div>
+                                <h3 className="text-2xl font-black uppercase tracking-tighter">Construtores Zerados</h3>
+                                <p className="text-f1-gray mt-2 max-w-md mx-auto">
+                                    A disputa das equipes ainda não começou! Acompanhe a tabela de construtores aqui após a bandeirada inicial da temporada.
+                                </p>
                             </div>
                         </Card>
-                    ))
+                    )
                 )}
             </div>
         </div>
