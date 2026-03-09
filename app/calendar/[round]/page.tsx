@@ -1,10 +1,11 @@
 import React from 'react';
 import { getRaceByRound } from '@/services/api';
 import { Card, Badge } from '@/components/UI';
-import { MapPin, Calendar, Clock, Tv, Info } from 'lucide-react';
+import { MapPin, Calendar, Clock, Tv, Info, ExternalLink } from 'lucide-react';
 import { format, parseISO, addHours } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { CircuitPreview } from '@/components/CircuitPreview';
+import Link from 'next/link';
 
 export const revalidate = 86400; // Daily
 
@@ -52,6 +53,15 @@ export default async function RaceDetailPage({ params }: { params: { round: stri
         { name: 'Grande Prêmio', data: { date: race.date, time: race.time }, channel: 'Globo / SporTV / F1TV' },
     ].filter(s => s.data);
 
+    const isSessionFinished = (dateStr: string, timeStr: string) => {
+        try {
+            const utcDate = parseISO(`${dateStr}T${timeStr || '23:59:00Z'}`);
+            return new Date() > utcDate;
+        } catch (e) {
+            return false;
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-12">
             <div className="mb-8">
@@ -78,29 +88,65 @@ export default async function RaceDetailPage({ params }: { params: { round: stri
             <div className="grid grid-cols-1 gap-6">
                 <h2 className="text-xl font-bold uppercase tracking-tight italic border-l-4 border-f1-red pl-4">Programação (Horário de Brasília)</h2>
 
-                {sessions.map((session, index) => (
-                    <Card key={index} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-6">
-                            <div className="bg-f1-red/10 p-3 rounded-lg text-f1-red">
-                                <Clock size={24} />
-                            </div>
-                            <div>
-                                <h3 className="font-black uppercase tracking-tight text-lg">{session.name}</h3>
-                                <p className="text-f1-gray font-medium">{formatBrazilDate(session.data!.date, session.data!.time)}</p>
-                            </div>
-                        </div>
+                {sessions.map((session, index) => {
+                    const isFinished = session.data && isSessionFinished(session.data.date, session.data.time);
+                    const isLinkable = ['Sprint', 'Classificação', 'Grande Prêmio'].includes(session.name);
+                    const getLink = () => {
+                        if (session.name === 'Sprint') return `/results/${race.round}?session=sprint`;
+                        if (session.name === 'Classificação') return `/results/${race.round}?session=qualifying`;
+                        return `/results/${race.round}?session=race`;
+                    };
 
-                        <div className="flex flex-col md:items-end gap-2">
-                            <div className="text-2xl font-black italic">
-                                {formatBrazilTime(session.data!.date, session.data!.time)}
+                    const cardContent = (
+                        <Card className={`p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 ${isFinished && isLinkable ? 'hover:border-f1-red/30 transition-colors group cursor-pointer' : ''}`}>
+                            <div className="flex items-center gap-6">
+                                <div className="bg-f1-red/10 p-3 rounded-lg text-f1-red">
+                                    <Clock size={24} />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-black uppercase tracking-tight text-lg group-hover:text-f1-red transition-colors">{session.name}</h3>
+                                        {isFinished && isLinkable && (
+                                            <Badge variant="winner" className="text-[10px]">
+                                                Ver Resultados
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <p className="text-f1-gray font-medium">{formatBrazilDate(session.data!.date, session.data!.time)}</p>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 text-xs font-bold uppercase text-f1-gray">
-                                <Tv size={14} className="text-f1-red" />
-                                {session.channel}
+
+                            <div className="flex flex-col md:items-end gap-2">
+                                <div className="flex items-center gap-4">
+                                    <div className="text-2xl font-black italic">
+                                        {formatBrazilTime(session.data!.date, session.data!.time)}
+                                    </div>
+                                    {isFinished && isLinkable && (
+                                        <ExternalLink size={20} className="text-f1-gray opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs font-bold uppercase text-f1-gray">
+                                    <Tv size={14} className="text-f1-red" />
+                                    {session.channel}
+                                </div>
                             </div>
+                        </Card>
+                    );
+
+                    if (isFinished && isLinkable) {
+                        return (
+                            <Link href={getLink()} key={index} className="block">
+                                {cardContent}
+                            </Link>
+                        );
+                    }
+
+                    return (
+                        <div key={index}>
+                            {cardContent}
                         </div>
-                    </Card>
-                ))}
+                    );
+                })}
             </div>
 
             <Card className="mt-12 p-8 bg-f1-card/50 border-dashed">

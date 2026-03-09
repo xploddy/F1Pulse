@@ -69,11 +69,50 @@ export const getRaceByRound = async (round: string, year: string = 'current'): P
 
 export const getWorldChampions = async (): Promise<any[]> => {
     try {
-        // Jolpi API might require a season for standings, fallback to current if 1.json fails
-        const response = await api.get('/current/driverStandings.json');
+        const response = await api.get('/driverStandings/1.json?limit=100');
         return response.data?.MRData?.StandingsTable?.StandingsLists || [];
     } catch (error) {
         console.error('Error fetching world champions:', error);
+        return [];
+    }
+};
+
+export const getRaceResults = async (round: string, year: string = 'current'): Promise<any | null> => {
+    try {
+        const response = await api.get(`/${year}/${round}/results.json`);
+        return response.data?.MRData?.RaceTable?.Races?.[0] || null;
+    } catch (error) {
+        console.error(`Error fetching results for round ${round}:`, error);
+        return null;
+    }
+};
+
+export const getQualifyingResults = async (round: string, year: string = 'current'): Promise<any | null> => {
+    try {
+        const response = await api.get(`/${year}/${round}/qualifying.json`);
+        return response.data?.MRData?.RaceTable?.Races?.[0] || null;
+    } catch (error) {
+        console.error(`Error fetching qualifying for round ${round}:`, error);
+        return null;
+    }
+};
+
+export const getSprintResults = async (round: string, year: string = 'current'): Promise<any | null> => {
+    try {
+        const response = await api.get(`/${year}/${round}/sprint.json`);
+        return response.data?.MRData?.RaceTable?.Races?.[0] || null;
+    } catch (error) {
+        console.error(`Error fetching sprint for round ${round}:`, error);
+        return null;
+    }
+};
+
+export const getSeasonWinners = async (year: string = 'current'): Promise<any[]> => {
+    try {
+        const response = await api.get(`/${year}/results/1.json`);
+        return response.data?.MRData?.RaceTable?.Races || [];
+    } catch (error) {
+        console.error(`Error fetching season winners for ${year}:`, error);
         return [];
     }
 };

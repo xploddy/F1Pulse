@@ -1,7 +1,7 @@
-import React from 'react';
-import { getWorldChampions } from '@/services/api';
+import { getWorldChampions, getSeasonWinners } from '@/services/api';
 import { Card, Badge } from '@/components/UI';
-import { Trophy, History as HistoryIcon, User, Star, Flag, Timer, Map as MapIcon, Users } from 'lucide-react';
+import { Trophy, History as HistoryIcon, User, Star, Flag, Timer, Map as MapIcon, Users, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 export const revalidate = 86400; // Daily
 
@@ -72,8 +72,13 @@ const TOP_TRACKS = [
 ];
 
 export default async function HistoryPage() {
-    const standingsLists = await getWorldChampions();
+    const [standingsLists, raceWinners] = await Promise.all([
+        getWorldChampions(),
+        getSeasonWinners()
+    ]);
+
     const champions = [...standingsLists].reverse();
+    const completedRaces = [...raceWinners].reverse();
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-12">
@@ -94,7 +99,7 @@ export default async function HistoryPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {champions.slice(0, 40).map((list: any) => {
+                        {champions.map((list: any) => {
                             const champion = list.DriverStandings[0];
                             const constructor = champion.Constructors[0];
 
@@ -115,6 +120,43 @@ export default async function HistoryPage() {
                         })}
                     </div>
                 </section>
+
+                {/* Vencedores por Etapa (Nova seção) */}
+                {completedRaces.length > 0 && (
+                    <section>
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-black uppercase tracking-tight italic border-l-8 border-f1-red pl-4">Vencedores por Etapa (2026)</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {completedRaces.slice(0, 6).map((race) => (
+                                <Card key={race.round} className="p-6 relative overflow-hidden group hover:border-f1-red/30 transition-colors">
+                                    <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <Trophy size={120} />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <Badge variant="winner">Round {race.round}</Badge>
+                                            <span className="text-[10px] uppercase font-bold text-f1-gray">{race.Circuit.Location.country}</span>
+                                        </div>
+                                        <h3 className="text-xl font-black uppercase italic tracking-tighter mb-1">{race.raceName.replace(' Grand Prix', '')}</h3>
+                                        <p className="text-f1-red font-bold uppercase text-xs tracking-widest">{race.Circuit.circuitName}</p>
+                                        <div className="mt-4 pt-4 border-t border-f1-gray/10 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-full bg-f1-dark flex items-center justify-center text-[10px] font-black italic text-f1-red">#1</div>
+                                                <span className="font-bold text-sm uppercase tracking-tight">
+                                                    {race.Results?.[0]?.Driver.familyName || 'Vencedor Indisponível'}
+                                                </span>
+                                            </div>
+                                            <Link href={`/results/${race.round}`} className="text-[10px] font-bold uppercase text-f1-gray hover:text-white transition-colors">
+                                                Detalhes
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Pilotos e Pistas */}
                 <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
