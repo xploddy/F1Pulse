@@ -88,9 +88,9 @@ export default async function RaceResultsDetailPage({ params, searchParams }: { 
                                     </span>
                                 </div>
                                 <div className="flex flex-col w-32 md:w-48">
-                                    <span className="font-black uppercase text-sm tracking-tight truncate" title={`${result.Driver.givenName} ${result.Driver.familyName}`}>
+                                    <Link href={`/drivers/${result.Driver.driverId}`} className="font-black uppercase text-sm tracking-tight truncate hover:text-f1-red transition-colors" title={`${result.Driver.givenName} ${result.Driver.familyName}`}>
                                         {result.Driver.givenName} {result.Driver.familyName}
-                                    </span>
+                                    </Link>
                                     <span className="text-[10px] text-f1-gray font-bold">{result.Driver.code || result.number}</span>
                                 </div>
 
@@ -119,7 +119,7 @@ export default async function RaceResultsDetailPage({ params, searchParams }: { 
 
                             <div className="flex items-center gap-4 md:gap-12 text-right">
                                 <div className="hidden md:block w-24">
-                                    <span className="text-[10px] uppercase font-black tracking-tighter truncate block">{result.Constructor.name}</span>
+                                    <Link href={`/teams/${result.Constructor.constructorId}`} className="text-[10px] uppercase font-black tracking-tighter truncate block hover:text-f1-red transition-colors">{result.Constructor.name}</Link>
                                 </div>
                                 {sessionType !== 'qualifying' && (
                                     <div className="w-16 md:w-20">

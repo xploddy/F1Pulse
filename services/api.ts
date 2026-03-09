@@ -146,6 +146,179 @@ export const getCurrentConstructors = async (): Promise<any[]> => {
         return [];
     }
 };
+
+export const getDriverDetails = async (driverId: string): Promise<any | null> => {
+    try {
+        const response = await api.get(`/drivers/${driverId}.json`);
+        return response.data?.MRData?.DriverTable?.Drivers?.[0] || null;
+    } catch (error) {
+        console.error(`Error fetching driver ${driverId} details:`, error);
+        return null;
+    }
+};
+
+export const getDriverCareerStats = async (driverId: string) => {
+    try {
+        const [racesRes, winsRes] = await Promise.all([
+            api.get(`/drivers/${driverId}/races.json?limit=1`),
+            api.get(`/drivers/${driverId}/results/1.json?limit=1`)
+        ]);
+
+        let totalPoints = 0;
+        let totalPodiums = 0;
+
+        const firstPage = await api.get(`/drivers/${driverId}/results.json?limit=100`);
+        let allRaces = firstPage.data?.MRData?.RaceTable?.Races || [];
+        const totalRows = parseInt(firstPage.data?.MRData?.total || '0');
+        const pages = Math.ceil(totalRows / 100);
+
+        if (pages > 1) {
+            for (let i = 1; i < pages; i++) {
+                try {
+                    const res = await api.get(`/drivers/${driverId}/results.json?limit=100&offset=${i * 100}`);
+                    allRaces = allRaces.concat(res.data?.MRData?.RaceTable?.Races || []);
+                    // Small delay to prevent 429 from Jolpi API
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                } catch (err) {
+                    console.error('Pagination error driver:', err);
+                }
+            }
+        }
+
+        allRaces.forEach((race: any) => {
+            race.Results?.forEach((r: any) => {
+                totalPoints += parseFloat(r.points || '0');
+                const pos = parseInt(r.position);
+                if (pos <= 3) totalPodiums++;
+            });
+        });
+
+        const activeChampions: Record<string, number> = {
+            'hamilton': 7,
+            'verstappen': 4,
+            'alonso': 2
+        };
+
+        return {
+            championships: activeChampions[driverId] || 0,
+            races: parseInt(racesRes.data?.MRData?.total || '0'),
+            wins: parseInt(winsRes.data?.MRData?.total || '0'),
+            points: totalPoints,
+            podiums: totalPodiums,
+        };
+    } catch {
+        return { championships: 0, races: 0, wins: 0, points: 0, podiums: 0 };
+    }
+};
+
+export const getDriverCurrentYearResults = async (driverId: string, year: string = 'current'): Promise<any[]> => {
+    try {
+        const response = await api.get(`/${year}/drivers/${driverId}/results.json`);
+        return response.data?.MRData?.RaceTable?.Races || [];
+    } catch (error) {
+        console.error(`Error fetching driver ${driverId} results for ${year}:`, error);
+        return [];
+    }
+};
+
+export const getConstructorDetails = async (constructorId: string): Promise<any | null> => {
+    try {
+        const response = await api.get(`/constructors/${constructorId}.json`);
+        return response.data?.MRData?.ConstructorTable?.Constructors?.[0] || null;
+    } catch (error) {
+        console.error(`Error fetching constructor ${constructorId} details:`, error);
+        return null;
+    }
+};
+
+export const getConstructorCareerStats = async (constructorId: string) => {
+    try {
+        const [racesRes, winsRes] = await Promise.all([
+            api.get(`/constructors/${constructorId}/races.json?limit=1`),
+            api.get(`/constructors/${constructorId}/results/1.json?limit=1`)
+        ]);
+
+        let totalPoints = 0;
+        let totalPodiums = 0;
+
+        const firstPage = await api.get(`/constructors/${constructorId}/results.json?limit=100`);
+        let allRaces = firstPage.data?.MRData?.RaceTable?.Races || [];
+        const totalRows = parseInt(firstPage.data?.MRData?.total || '0');
+        const pages = Math.ceil(totalRows / 100);
+
+        if (pages > 1) {
+            for (let i = 1; i < pages; i++) {
+                try {
+                    const res = await api.get(`/constructors/${constructorId}/results.json?limit=100&offset=${i * 100}`);
+                    allRaces = allRaces.concat(res.data?.MRData?.RaceTable?.Races || []);
+                    // Delay to prevent 429 from Jolpi API
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                } catch (err) {
+                    console.error('Pagination error constructor:', err);
+                }
+            }
+        }
+
+        allRaces.forEach((race: any) => {
+            race.Results?.forEach((r: any) => {
+                totalPoints += parseFloat(r.points || '0');
+                const pos = parseInt(r.position);
+                if (pos <= 3) totalPodiums++;
+            });
+        });
+
+        const activeTeamChampions: Record<string, number> = {
+            'ferrari': 16,
+            'williams': 9,
+            'mclaren': 8,
+            'mercedes': 8,
+            'red_bull': 6,
+            'alpine': 2,
+            'renault': 2
+        };
+
+        return {
+            championships: activeTeamChampions[constructorId] || 0,
+            races: parseInt(racesRes.data?.MRData?.total || '0'),
+            wins: parseInt(winsRes.data?.MRData?.total || '0'),
+            points: totalPoints,
+            podiums: totalPodiums,
+        };
+    } catch {
+        return { championships: 0, races: 0, wins: 0, points: 0, podiums: 0 };
+    }
+};
+
+export const getConstructorCurrentYearResults = async (constructorId: string, year: string = 'current'): Promise<any[]> => {
+    try {
+        const response = await api.get(`/${year}/constructors/${constructorId}/results.json`);
+        return response.data?.MRData?.RaceTable?.Races || [];
+    } catch (error) {
+        console.error(`Error fetching constructor ${constructorId} results for ${year}:`, error);
+        return [];
+    }
+};
+
+export const getAllSeasonResults = async (year: string = 'current'): Promise<any[]> => {
+    try {
+        const response = await api.get(`/${year}/results.json?limit=1000`);
+        return response.data?.MRData?.RaceTable?.Races || [];
+    } catch (error) {
+        console.error(`Error fetching all season results for ${year}:`, error);
+        return [];
+    }
+};
+
+export const getAllSeasonQualifying = async (year: string = 'current'): Promise<any[]> => {
+    try {
+        const response = await api.get(`/${year}/qualifying.json?limit=1000`);
+        return response.data?.MRData?.RaceTable?.Races || [];
+    } catch (error) {
+        console.error(`Error fetching all season qualifying for ${year}:`, error);
+        return [];
+    }
+};
+
 export const getF1News = async (): Promise<any[]> => {
     try {
         const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY || '5afe87181f774c0fad0d04ca5f8a180c';

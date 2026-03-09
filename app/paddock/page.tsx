@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { Card, Badge } from '@/components/UI';
-import { User, Globe } from 'lucide-react';
+import { User, Globe, Swords } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 const TEAM_DATA = [
     {
@@ -145,13 +146,25 @@ const TEAM_DATA = [
 export default function PaddockPage() {
     return (
         <div className="max-w-7xl mx-auto px-4 py-12">
-            <div className="flex flex-col mb-12">
+            <div className="flex flex-col mb-8">
                 <h1 className="text-4xl font-black uppercase tracking-tight italic flex items-center gap-4 text-white">
                     Paddock Grid 2026
                     <Badge variant="winner">Brasília Time</Badge>
                 </h1>
                 <p className="text-f1-gray mt-2 text-lg font-medium">Conheça as equipes, carros e pilotos oficiais da temporada 2026.</p>
             </div>
+
+            <Link href="/head-to-head" className="block mb-12 group">
+                <Card className="p-8 border-f1-red/30 bg-gradient-to-r from-f1-red/10 to-transparent group-hover:border-f1-red transition-all cursor-pointer relative overflow-hidden flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <Swords size={24} className="text-f1-red group-hover:scale-110 transition-transform" />
+                            <h2 className="text-2xl font-black uppercase italic tracking-tighter">Batalhas Internas (H2H)</h2>
+                        </div>
+                        <p className="text-f1-gray max-w-xl text-sm font-medium">Compare o desempenho direto entre companheiros de equipe nas qualificações e corridas da temporada.</p>
+                    </div>
+                </Card>
+            </Link>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {TEAM_DATA.map((team) => (
